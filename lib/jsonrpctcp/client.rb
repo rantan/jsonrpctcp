@@ -30,6 +30,7 @@ module Jsonrpctcp
     def initialize(host, port)
       @host = host
       @port = port
+      @socket = TCPSocket.open(@host, @port)
     end
 
     # @return [TrueClass,FalseClass] returns whether a 
@@ -79,15 +80,15 @@ module Jsonrpctcp
 
       call_obj_json = call_obj.to_json
       begin
-        socket = TCPSocket.open(@host, @port)
-        socket.write(call_obj_json)
-        socket.close_write()
-        response = socket.read()
+        # socket = TCPSocket.open(@host, @port)
+        @socket.write(call_obj_json)
+        @socket.close_write()
+        response = @socket.read()
         parsed_response = JSON.load(response)
       rescue JSON::ParserError
         raise RPCException.new("RPC response could not be parsed")
       ensure
-        socket.close() if socket
+        # socket.close() if socket
       end
 
       if Client.is_error?(parsed_response)
